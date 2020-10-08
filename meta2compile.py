@@ -42,10 +42,12 @@ class metaParser(Parser):
             count += 1
 
     labels = labelsGen(1)
+    lastEx2Label = 1
+    def getExLabel(self):
+        return f'A{self.lastEx2Label}'
 
     @_('LSYN NAME rule_list LEND')
     def program(self, p):
-        print('-> program')
         return inst('ADR '+p.NAME) + p.rule_list + inst('END')
 
     @_('rule')
@@ -57,7 +59,6 @@ class metaParser(Parser):
 
     @_('NAME EQUAL ex1 SEMICOLON')
     def rule(self, p):
-        print('-------> rule')
         return label(p.NAME) + p.ex1 + inst('R')
 
     @_('L1')
@@ -75,14 +76,13 @@ class metaParser(Parser):
 
     @_('out1_list out1')
     def out1_list(self, p):
-        return p.out1 + p.out1_list
+        return p.out1_list + p.out1
     @_('out1')
     def out1_list(self, p):
         return p.out1
 
     @_('OUT LPAREN out1_list RPAREN')
     def output(self, p):
-        print('-> output')
         return p.out1_list + inst('OUT')
     @_('LABEL out1')
     def output(self, p):
@@ -120,58 +120,56 @@ class metaParser(Parser):
         return p.ex3 + inst('BE')
     @_('output')
     def ex2_h(self, p):
-        print('--> ex2_h')
+        #print('--> ex2_h')
         return p.output
     @_('output ex2_h', 'ex3 ex2_h')
     def ex2_h(self, p):
-        print('--> ex2_h nested')
+        #print('--> ex2_h nested')
         return p[0] + inst('BE') + p.ex2_h
 
 
     @_('ex3 ex2_h')
     def ex2(self, p):
-        print('---> ex2')
+        #print('---> ex2')
         ll = next(self.labels)
-        self.lastl = next(self.labels)
         return p.ex3 + inst('BF '+ll) +  p.ex2_h + label(ll)
     @_('ex3')
     def ex2(self, p):
-        print('---> ex2')
+        #print('---> ex2')
         ll = next(self.labels)
-        self.lastl = next(self.labels)
         return p.ex3 + inst('BF '+ll) + label(ll)
     @_('output ex2_h')
     def ex2(self, p):
-        print('---> ex2')
-        self.lastl = next(self.labels)
+        #print('---> ex2')
         return p.output + p.ex2_h
     @_('output')
     def ex2(self, p):
-        print('---> ex2')
-        self.lastl = next(self.labels)
+        #print('---> ex2')
         return p.output
 
 
     @_('ex1_h OR ex2')
     def ex1_h(self, p):
-        print('----> ex1h 2')
-        ll = self.lastl
+        #print('----> ex1h 2')
+        ll = self.getExLabel()
         return p.ex1_h + inst('BT '+ll) + p.ex2
     @_('OR ex2')
     def ex1_h(self, p):
-        print('----> ex1h 1')
-        ll = self.lastl
+        #print('----> ex1h 1')
+        ll = self.getExLabel()
         return inst('BT '+ll) + p.ex2
 
     @_('ex2 ex1_h')
     def ex1(self, p):
-        print('-----> ex1 with /')
-        ll = self.lastl
+        #print('-----> ex1 with /')
+        ll = self.getExLabel()
+        self.lastEx2Label += 1
         return p.ex2 + p.ex1_h + label(ll)
     @_('ex2')
     def ex1(self, p):
-        print('-----> ex1')
-        ll = self.lastl
+        #print('-----> ex1')
+        ll = self.getExLabel()
+        self.lastEx2Label += 1
         return p.ex2 + label(ll)
 
 
@@ -181,11 +179,11 @@ with open(fname) as file:
     text = file.read()
 
 lexer = metaLexer()
-for tok in lexer.tokenize(text):
-    print(f'{tok.value}\t\t{tok.type}')
+#for tok in lexer.tokenize(text):
+#    print(f'{tok.value}\t\t{tok.type}')
 parser = metaParser()
 res = parser.parse(lexer.tokenize(text))
-print()
-print(res)
+#print()
+#print(res)
 with open(fname.split('.')[0] + '.m2asm', 'w') as file:
     file.write(res)
