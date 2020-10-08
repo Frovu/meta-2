@@ -1,6 +1,23 @@
 #!/usr/bin/python
 
+from sly import Lexer
 import re
+
+class inputLexer(Lexer):
+    tokens = { NAME, STRING, SEMICOLON, L1, L2, ASTERISK,
+        OR, EQUAL, LPAREN, RPAREN, SEQ}
+    ignore = ' \t\n'
+    SEMICOLON = r'\.\,'
+    L1 = r'\*1'
+    L2 = r'\*2'
+    ASTERISK = r'\*'
+    NAME   = r'[\.a-zA-Z][a-zA-Z0-9]*'
+    STRING = r'\'[^\']+\''
+    SEQ    = r'\$'
+    OR     = r'/'
+    EQUAL  = r'='
+    LPAREN = r'\('
+    RPAREN = r'\)'
 
 class METAII:
     def parse(self, text):
@@ -15,8 +32,6 @@ class METAII:
                 counter += 1
             else:
                 self.labels[line.strip()] = counter
-        #for l in self.program: print(l)
-        #print(self.labels)
 
     def __init__(self, program, input, output_filename):
         self.parse(program)
@@ -25,7 +40,7 @@ class METAII:
         self.print_label = False
         self.lastLabel = 0
         self.stack = [['', '', len(self.program)]]
-        self.input = input.split()
+        self.input = [t.value for t in inputLexer().tokenize(input)]
         self.output = []
         self.output_text = ''
         self.token_buffer = ''
@@ -34,17 +49,20 @@ class METAII:
             file.write(self.output_text)
 
     def run(self):
+        cc = 0
         while self.IP < len(self.program):
             saved = self.IP
             self.execute(self.program[self.IP])
             if saved == self.IP: # bad solution
                 self.IP += 1
+            cc += 1
+        print(f'ran {cc} commands')
 
     def execute(self, command):
-        print(f'{self.IP}: {command}')
-        inp = self.input[0]
+        inp = self.input[0] if len(self.input) else ''
         order = command[0]
         arg = command[1]
+        #print(f'{self.IP}:\t{order}\t({arg})\t<- {inp}')
         if order == 'TST':
             if inp == arg:
                 self.SW = True
@@ -58,7 +76,7 @@ class METAII:
         elif order == 'SR':
             self.get_token('SR')
         elif order == 'CLL':
-            print(f'calling {arg}')
+            #print(f'calling {arg}')
             self.stack.append(['', '', self.IP+1])
             self.IP = self.labels[arg]
         elif order == 'R':
@@ -70,11 +88,9 @@ class METAII:
             self.IP = self.labels[arg]
         elif order == 'BT':
             if self.SW:
-                print(f'branching')
                 self.IP = self.labels[arg]
         elif order == 'BF':
             if not self.SW:
-                print(f'branching')
                 self.IP = self.labels[arg]
         elif order == 'CL':
             self.output.append(str(arg))
