@@ -84,7 +84,7 @@ class metaParser(Parser):
     def output(self, p):
         print('-> output')
         return p.out1_list + inst('OUT')
-    @_('LABEL LPAREN out1 RPAREN')
+    @_('LABEL out1')
     def output(self, p):
         return inst('LB') + p.out1 + inst('OUT')
 
@@ -175,14 +175,10 @@ class metaParser(Parser):
         return p.ex2 + label(ll)
 
 
+fname = 'meta2.meta2'
 
-
-text = '''.SYNTAX PROGRAM
-EX3 = .ID .OUT('LD ' *) / '(' EX1 ')' .,
-EX2 = EX3 $ ('*' EX3 .OUT('MLT')) .,
-EX1 = EX2 $ ('+' EX2 .OUT('ADD')) .,
-.END
-'''
+with open(fname) as file:
+    text = file.read()
 
 lexer = metaLexer()
 for tok in lexer.tokenize(text):
@@ -190,5 +186,6 @@ for tok in lexer.tokenize(text):
 parser = metaParser()
 res = parser.parse(lexer.tokenize(text))
 print()
-print()
 print(res)
+with open(fname.split('.')[0] + '.m2asm', 'w') as file:
+    file.write(res)
