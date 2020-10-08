@@ -1,0 +1,8 @@
+	ADR PROGRAM
+OUT1
+	TST '*1'
+	BF L1
+L1
+L2
+	R
+	END
