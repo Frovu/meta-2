@@ -106,7 +106,7 @@ class metaParser(Parser):
         return inst('SR')
     @_('LPAREN ex1 RPAREN')
     def ex3(self, p):
-        return inst('SET')
+        return p.ex1
     @_('LEMP')
     def ex3(self, p):
         return inst('SET')
@@ -121,7 +121,7 @@ class metaParser(Parser):
     @_('output')
     def ex2_h(self, p):
         print('--> ex2_h')
-        return p.output + inst('BE')
+        return p.output
     @_('output ex2_h', 'ex3 ex2_h')
     def ex2_h(self, p):
         print('--> ex2_h nested')
@@ -132,42 +132,47 @@ class metaParser(Parser):
     def ex2(self, p):
         print('---> ex2')
         ll = next(self.labels)
+        self.lastl = next(self.labels)
         return p.ex3 + inst('BF '+ll) +  p.ex2_h + label(ll)
     @_('ex3')
     def ex2(self, p):
         print('---> ex2')
         ll = next(self.labels)
+        self.lastl = next(self.labels)
         return p.ex3 + inst('BF '+ll) + label(ll)
     @_('output ex2_h')
     def ex2(self, p):
         print('---> ex2')
+        self.lastl = next(self.labels)
         return p.output + p.ex2_h
     @_('output')
     def ex2(self, p):
         print('---> ex2')
+        self.lastl = next(self.labels)
         return p.output
 
 
     @_('ex1_h OR ex2')
     def ex1_h(self, p):
         print('----> ex1h 2')
-        return p.ex1_h + p.ex2
+        ll = self.lastl
+        return p.ex1_h + inst('BT '+ll) + p.ex2
     @_('OR ex2')
     def ex1_h(self, p):
         print('----> ex1h 1')
-        return p.ex2
+        ll = self.lastl
+        return inst('BT '+ll) + p.ex2
 
     @_('ex2 ex1_h')
     def ex1(self, p):
         print('-----> ex1 with /')
-        ll = next(self.labels)
-        return p.ex2 + inst('BT '+ll) + p.ex1_h + label(ll)
+        ll = self.lastl
+        return p.ex2 + p.ex1_h + label(ll)
     @_('ex2')
     def ex1(self, p):
         print('-----> ex1')
-        ll = next(self.labels)
+        ll = self.lastl
         return p.ex2 + label(ll)
-
 
 
 
@@ -178,11 +183,7 @@ EX2 = EX3 $ ('*' EX3 .OUT('MLT')) .,
 EX1 = EX2 $ ('+' EX2 .OUT('ADD')) .,
 .END
 '''
-text = '''
-.SYNTAX PROGRAM
-EX1 = .ID / .ID / .ID .,
-.END
-'''
+
 lexer = metaLexer()
 for tok in lexer.tokenize(text):
     print(f'{tok.value}\t\t{tok.type}')
