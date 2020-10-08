@@ -44,7 +44,6 @@ L6
 	BF L7
 	CL 'LB'
 	OUT
-	BE
 	CLL OUT1
 	BE
 L7
@@ -107,13 +106,11 @@ L15
 	LB
 	GN1
 	OUT
-	BE
 	CLL EX3
 	BE
 	CL 'BT '
 	GN1
 	OUT
-	BE
 	CL 'SET'
 	OUT
 L16
@@ -161,7 +158,6 @@ L24
 	CL 'BT '
 	GN1
 	OUT
-	BE
 	CLL EX2
 	BE
 L23
@@ -181,7 +177,6 @@ ST
 	LB
 	CI
 	OUT
-	BE
 	TST '='
 	BE
 	CLL EX1
@@ -201,7 +196,6 @@ PROGRAM
 	CL 'ADR '
 	CI
 	OUT
-	BE
 L27
 	CLL ST
 	BT L27

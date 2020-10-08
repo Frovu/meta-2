@@ -120,12 +120,14 @@ class metaParser(Parser):
         return p.ex3 + inst('BE')
     @_('output')
     def ex2_h(self, p):
-        #print('--> ex2_h')
         return p.output
-    @_('output ex2_h', 'ex3 ex2_h')
+    @_('output ex2_h')
     def ex2_h(self, p):
-        #print('--> ex2_h nested')
-        return p[0] + inst('BE') + p.ex2_h
+        return p.output + p.ex2_h
+
+    @_('ex3 ex2_h')
+    def ex2_h(self, p):
+        return p.ex3 + inst('BE') + p.ex2_h
 
 
     @_('ex3 ex2_h')
