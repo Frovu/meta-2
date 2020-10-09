@@ -4,25 +4,28 @@ import sys
 indent = 0
 out_buf = ""
 in_buf = ""
-flag = 0
+flag = 1
 def push(x): global out_buf; out_buf += x
 def out(): global out_buf; print("\t"*indent + out_buf); out_buf=""
 def check_err():
-	if flag: print("ERROR"); sys.exit(1)
+	if not flag: print("ERROR"); sys.exit(1)
 def skip():
 	while input.peek(1)[:1] in b" \t\n": input.seek(1, 1)
 def read(t):
+	global in_buf, flag;
 	skip(); n = input.peek(1)[:1].decode()
 	if not((t=="id" and n in string.printable[10:62]+".")
 		or (t=="str" and ord(n) == 39)
 		or (t=="num" and n in string.printable[:10])):
 		flag = 0; return
-	global in_buf; in_buf = n; input.seek(1, 1); flag = 1
+	in_buf = n; input.seek(1, 1); flag = 1
 	while n := input.peek(1)[:1].decode():
 		if not ((t=="id" and n in string.printable[:62])
 			or (t=="str" and ord(n) != 39)
 			or (t=="num" and n in string.printable[:10])): break
-		in_buf += n; input.seek(1, 1);
+		in_buf += n; input.seek(1, 1)
+	if t=="str": in_buf += n
+	print(f'<###> read str: {in_buf}')
 def test(x):
 	skip(); global flag
 	if input.peek(len(x))[:len(x)] == x.encode():
@@ -30,6 +33,7 @@ def test(x):
 	else: flag = 0
 
 def e_OUTA():
+	global flag, indent
 	while True:
 		test('*')
 		if flag:
@@ -47,6 +51,7 @@ def e_OUTA():
 		break
 
 def e_OUTPUT():
+	global flag, indent
 	while True:
 		test('.out')
 		if flag:
@@ -82,6 +87,8 @@ def e_OUTPUT():
 		break
 
 def e_EX3():
+	global flag, indent
+	print(f'<###> ex3 f={flag} i={indent}')
 	while True:
 		read("id")
 		if flag:
@@ -145,6 +152,8 @@ def e_EX3():
 		break
 
 def e_EX2():
+	global flag, indent
+	print(f'<###> ex2')
 	while True:
 		while True:
 			e_EX3()
@@ -164,7 +173,7 @@ def e_EX2():
 			indent+=1
 			flag = 1
 			while flag:
-				while True:
+				for i in range(10):
 					e_EX3()
 					if flag:
 						pass
@@ -180,6 +189,8 @@ def e_EX2():
 		break
 
 def e_EX1():
+	global flag, indent
+	print(f'<###> ex1')
 	while True:
 		push('while True:')
 		out()
@@ -206,6 +217,8 @@ def e_EX1():
 		break
 
 def e_STATEMENT():
+	global flag, indent
+	print(f'<###> st')
 	while True:
 		read("id")
 		if flag:
@@ -229,40 +242,14 @@ def e_STATEMENT():
 		break
 
 def e_PROGRAM():
+	global flag, indent
 	while True:
-		push('''import string
-import sys
-indent = 0
-out_buf = ""
-in_buf = ""
-flag = 0
-def push(x): global out_buf; out_buf += x
-def out(): global out_buf; print("\t"*indent + out_buf); out_buf=""
-def check_err(): if flag: print("ERROR"); sys.exit(1)
-def skip():
-		while input.peek(1)[:1] in b" \t\n": input.seek(1, 1)
-def read(t):
-		skip(); n = input.peek(1)[:1].decode()
-		if not((t=="id" and n in string.printable[10:62]+".")
-				or (t=="str" and ord(n) == 39)
-				or (t=="num" and n in string.printable[:10])):
-				flag = 0; return
-		global in_buf; in_buf = n; input.seek(1, 1); flag = 1
-		while n := input.peek(1)[:1].decode():
-				if not ((t=="id" and n in string.printable[:62])
-						or (t=="str" and ord(n) != 39)
-						or (t=="num" and n in string.printable[:10])): break
-				in_buf += n; input.seek(1, 1);
-def test(x):
-		skip(); global flag
-		if input.peek(len(x))[:len(x)] == x.encode():
-				input.seek(len(x), 1); flag = 1
-		else: flag = 0
-
-''')
+		push('''<--->''')
 		out()
 		if True:
+			print(123)
 			pass
+			print(321)
 			flag = 1
 			while flag:
 				e_STATEMENT()
