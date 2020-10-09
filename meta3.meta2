@@ -23,8 +23,7 @@ EX2 = (EX3 .OUT('	if flag:') / OUTPUT .OUT('	if True:'))
 EX1 = .OUT('while True:') EX2 $('/' .OUT('	if flag: break') EX2 )
 .OUT('	break') .,
 
-STATEMENT = .ID .LABEL 'def e_' .OUT(* '():') '=' EX1
-';' .OUT('').,
+STATEMENT = .ID .LABEL '' .OUT('def e_' * '():') '=' EX1 ';'.,
 
 PROGRAM = '.SYNTAX' .ID .OUT('
 import string
@@ -60,7 +59,7 @@ if len(sys.argv) < 1:
 	print(f"Usage: {sys.argv[0]} <program_file>")
 else:
 	input = open(sys.argv[1], "rb")
-	' * '()
+	e_' * '()
 
 ') $ STATEMENT '.END'.,
 

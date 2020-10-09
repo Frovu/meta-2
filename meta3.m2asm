@@ -167,8 +167,9 @@ STATEMENT
 	ID
 	BF L33
 	LB
-	CL 'def e_'
+	CL ''
 	OUT
+	CL 'def e_'
 	CI
 	CL '():'
 	OUT
@@ -178,8 +179,6 @@ STATEMENT
 	BE
 	TST ';'
 	BE
-	CL ''
-	OUT
 L33
 L34
 	R
@@ -222,7 +221,7 @@ if len(sys.argv) < 1:
 	print(f"Usage: {sys.argv[0]} <program_file>")
 else:
 	input = open(sys.argv[1], "rb")
-	'
+	e_'
 	CI
 	CL '()
 

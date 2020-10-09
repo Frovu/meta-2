@@ -32,11 +32,11 @@ if len(sys.argv) < 1:
 	print(f"Usage: {sys.argv[0]} <program_file>")
 else:
 	input = open(sys.argv[1], "rb")
-	PROGRAM()
+	e_PROGRAM()
 
 
-def e_
-	OUTA():
+
+def e_OUTA():
 	while True:
 			get_literal('*')
 		if flag:
@@ -50,9 +50,8 @@ def e_
 			push(')')
 			out()
 		break
-	
-def e_
-	OUTPUT():
+
+def e_OUTPUT():
 	while True:
 			get_literal('.out')
 		if flag:
@@ -82,9 +81,8 @@ def e_
 			push('out()')
 			out()
 		break
-	
-def e_
-	EX3():
+
+def e_EX3():
 	while True:
 			get_tok()
 		if flag:
@@ -138,9 +136,8 @@ def e_
 		check_err()
 			indent-=1
 		break
-	
-def e_
-	EX2():
+
+def e_EX2():
 	while True:
 	while True:
 			e_EX3()
@@ -169,9 +166,8 @@ def e_
 		check_err()
 			indent-=1
 		break
-	
-def e_
-	EX1():
+
+def e_EX1():
 	while True:
 			push('while True:')
 			out()
@@ -194,9 +190,8 @@ def e_
 			out()
 			indent-=1
 		break
-	
-def e_
-	STATEMENT():
+
+def e_STATEMENT():
 	while True:
 			get_tok()
 		if flag:
@@ -217,16 +212,14 @@ def e_
 			push('')
 			out()
 		break
-	
-def e_
-	PROGRAM():
+
+def e_PROGRAM():
 	while True:
 			get_literal('.SYNTAX')
 		if flag:
 			get_tok()
 		check_err()
-			push('''
-import string
+			push('''import string
 import sys
 indent = 0
 out_buf = ""
@@ -272,4 +265,3 @@ else:
 			get_literal('.END')
 		check_err()
 		break
-	
