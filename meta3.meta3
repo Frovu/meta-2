@@ -1,0 +1,67 @@
+.SYNTAX PROGRAM
+
+OUTA = '*' .out('push(in_buf)')
+	/ .STRING .out('push('*')');
+
+OUTPUT = '.out' '(' $OUTA ')' .out('out()')
+	/ '{' .out('indent+=1')
+	/ '}' .out('indent-=1')
+	/ '\n' .out('out()');
+
+EX3 = .ID .out('e_'*'()')
+	/ .STRING .out('test( '*' )')
+	/ '.ID'		 .out('read("id")')
+	/ '.NUMBER' .out('read("num")')
+	/ '.STRING' .out('read("str")')
+	/ '(' EX1 ')'
+	/ '.EMPTY' .out('flag = 1')
+	/ '$' .out('flag = 1') .out('while flag:') { EX3 } ;
+
+EX2 = (EX3 .out('if flag:') / OUTPUT .out('if True:'))
+	{ $(EX3 .out('check_err()') / OUTPUT) };
+
+EX1 = .out('while True:') { EX2 $('/' .out('if flag: break') EX2 )
+.out('break') } ;
+
+STATEMENT = .ID .out('def e_' * '():') .out('global flag, indent') '=' { EX1 }
+	';' .out('');
+
+PROGRAM = '.SYNTAX' .ID .out('
+import string
+import sys
+indent = 0
+out_buf = ""
+in_buf = ""
+flag = 0
+def push(x): out_buf += x
+def out(): print("\t"*indent + out_buf); out_buf=""
+def check_err(): if flag: print("ERROR"); sys.exit(1)
+def skip():
+		while input.peek(1)[:1] in b" \t\n": input.seek(1, 1)
+def read(t):
+		skip(); n = input.peek(1)[:1].decode()
+		if not((t=="id" and n in string.printable[10:62]+".")
+				or (t=="str" and ord(n) == 39)
+				or (t=="num" and n in string.printable[:10])):
+				flag = 0; return
+		global in_buf; in_buf = n; input.seek(1, 1); flag = 1
+		while n := input.peek(1)[:1].decode():
+				if not ((t=="id" and n in string.printable[:62])
+						or (t=="str" and ord(n) != 39)
+						or (t=="num" and n in string.printable[:10])): break
+				in_buf += n; input.seek(1, 1);
+def test(x):
+		skip(); global flag
+		if input.peek(len(x))[:len(x)] == x.encode():
+				input.seek(len(x), 1); flag = 1
+		else: flag = 0
+
+if len(sys.argv) < 1:
+	print(f"Usage: {sys.argv[0]} <program_file>")
+else:
+	input = open(sys.argv[1], "rb")
+	' * '()
+
+') $ STATEMENT '.END';
+
+.END
