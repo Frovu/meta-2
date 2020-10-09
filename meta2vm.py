@@ -5,8 +5,9 @@ import re
 
 class inputLexer(Lexer):
     tokens = { NAME, STRING, SEMICOLON, L1, L2, ASTERISK,
-        OR, EQUAL, LPAREN, RPAREN, SEQ}
-    SEMICOLON = r'\.\,'
+        OR, EQUAL, LPAREN, RPAREN, SEQ, CBR}
+    SEMICOLON = r'\.\,|;'
+    CBR = '{|}'
     L1 = r'\*1'
     L2 = r'\*2'
     ASTERISK = r'\*'
@@ -24,7 +25,7 @@ class progLexer(Lexer):
     CMD = r'\n?\t[A-Z0-9]+'
     LABEL = r'\n[A-Z0-9]+'
     ARG = r'[A-Z0-9]+'
-    STRING = r'\'[^\']+\''
+    STRING = r'\'[^\']*\''
 
 class METAII:
     def parse(self, text):
@@ -71,7 +72,7 @@ class METAII:
         inp = self.input[0] if len(self.input) else ''
         order = command[0]
         arg = command[1]
-        print(f'{self.IP}:\t{order}\t({arg})\t<- {inp}')
+        #print(f'{self.IP}:\t{order}\t({arg})\t<- {inp}')
         if order == 'TST':
             if inp == arg:
                 self.SW = True
@@ -97,11 +98,11 @@ class METAII:
             self.IP = self.labels[arg]
         elif order == 'BT':
             if self.SW:
-                print(f'branching t')
+                #print(f'branching t')
                 self.IP = self.labels[arg]
         elif order == 'BF':
             if not self.SW:
-                print(f'branching f')
+                #print(f'branching f')
                 self.IP = self.labels[arg]
         elif order == 'CL':
             self.output.append(str(arg))
@@ -114,12 +115,14 @@ class METAII:
         elif order == 'LB':
             self.print_label = True
         elif order == 'OUT':
-            p = " ".join(self.output)
+            p = "".join(self.output)
             self.output = []
             if self.print_label:
                 self.output_text += f'{p}\n'
                 self.print_label = False
             else:
+                if '.meta3' in sys.argv[2] and "'" in p and "\n" in p:
+                    p = p.replace("'", "'''")
                 self.output_text += f'\t{p}\n'
         elif order == 'ADR':
             if arg in self.labels:
@@ -142,7 +145,7 @@ class METAII:
         or type == 'SR' and re.match(r'\'[^\']*\'', inp)):
             self.SW = 1
             self.token_buffer = self.input.pop(0)
-            print(f'read tok: ({type})\t{inp}')
+            #print(f'read tok: ({type})\t{inp}')
         else:
             self.SW = 0
 

@@ -1,0 +1,241 @@
+	ADR PROGRAM
+OUTA
+	TST '*'
+	BF L1
+	CL '		push(in_buf)'
+	OUT
+L1
+	BT L2
+	SR
+	BF L3
+	CL '		push('
+	CI
+	CL ')'
+	OUT
+L3
+L2
+	R
+OUTPUT
+	TST '.out'
+	BF L4
+	TST '('
+	BE
+L5
+	CLL OUTA
+	BT L5
+	SET
+	BE
+	TST ')'
+	BE
+	CL '		out()'
+	OUT
+L4
+	BT L6
+	TST '{'
+	BF L7
+	CL '		indent+=1'
+	OUT
+L7
+	BT L6
+	TST '}'
+	BF L8
+	CL '		indent-=1'
+	OUT
+L8
+	BT L6
+	TST '\n'
+	BF L9
+	CL '		out()'
+	OUT
+L9
+L6
+	R
+EX3
+	ID
+	BF L10
+	CL '		e_'
+	CI
+	CL '()'
+	OUT
+L10
+	BT L11
+	SR
+	BF L12
+	CL '		get_literal('
+	CI
+	CL ')'
+	OUT
+L12
+	BT L11
+	TST '.ID'
+	BF L13
+	CL '		get_tok()'
+	OUT
+L13
+	BT L11
+	TST '.NUMBER'
+	BF L14
+	CL '		get_num()'
+	OUT
+L14
+	BT L11
+	TST '.STRING'
+	BF L15
+	CL '		get_str()'
+	OUT
+L15
+	BT L11
+	TST '('
+	BF L16
+	CLL EX1
+	BE
+	TST ')'
+	BE
+L16
+	BT L11
+	TST '.EMPTY'
+	BF L17
+	CL '		flag = 1'
+	OUT
+L17
+	BT L11
+	TST '$'
+	BF L18
+	CL '		flag = 1'
+	OUT
+	CL '		while flag:'
+	OUT
+	CLL EX3
+	BE
+L18
+L11
+	R
+EX2
+	CLL EX3
+	BF L19
+	CL '	if flag:'
+	OUT
+L19
+	BT L20
+	CLL OUTPUT
+	BF L21
+	CL '	if True:'
+	OUT
+L21
+L20
+	BF L22
+L23
+	CLL EX3
+	BF L24
+	CL '	check_err()'
+	OUT
+L24
+	BT L25
+	CLL OUTPUT
+	BF L26
+L26
+L25
+	BT L23
+	SET
+	BE
+L22
+L27
+	R
+EX1
+	CL 'while True:'
+	OUT
+	CLL EX2
+	BE
+L28
+	TST '/'
+	BF L29
+	CL '	if flag: break'
+	OUT
+	CLL EX2
+	BE
+L29
+L30
+	BT L28
+	SET
+	BE
+	CL '	break'
+	OUT
+L31
+L32
+	R
+STATEMENT
+	ID
+	BF L33
+	LB
+	CL 'def e_'
+	OUT
+	CI
+	CL '():'
+	OUT
+	TST '='
+	BE
+	CLL EX1
+	BE
+	TST ';'
+	BE
+	CL ''
+	OUT
+L33
+L34
+	R
+PROGRAM
+	TST '.SYNTAX'
+	BF L35
+	ID
+	BE
+	CL '
+import string
+import sys
+indent = 0
+out_buf = ""
+in_buf = ""
+flag = 0
+def push(x): out_buf += x
+def out(): print("\t"*indent + out_buf); out_buf=""
+def check_err(): if flag: print("ERROR"); sys.exit(1)
+def skip():
+	while input.peek(1)[:1] in b" \t\n": input.seek(1, 1)
+def read(t):
+	skip(); n = input.peek(1)[:1].decode()
+	if not((t=="id" and n in string.printable[10:62]+".")
+		or (t=="str" and ord(n) == 39)
+		or (t=="num" and n in string.printable[:10])):
+		flag = 0; return
+	global in_buf; in_buf = n; input.seek(1, 1); flag = 1
+	while n := input.peek(1)[:1].decode():
+		if not ((t=="id" and n in string.printable[:62])
+			or (t=="str" and ord(n) != 39)
+			or (t=="num" and n in string.printable[:10])): break
+		in_buf += n; input.seek(1, 1);
+def test(x):
+	skip(); global flag
+	if input.peek(len(x))[:len(x)] == x.encode():
+		input.seek(len(x), 1); flag = 1
+	else: flag = 0
+
+if len(sys.argv) < 1:
+	print(f"Usage: {sys.argv[0]} <program_file>")
+else:
+	input = open(sys.argv[1], "rb")
+	'
+	CI
+	CL '()
+
+'
+	OUT
+L36
+	CLL STATEMENT
+	BT L36
+	SET
+	BE
+	TST '.END'
+	BE
+L35
+L37
+	R
+	END
