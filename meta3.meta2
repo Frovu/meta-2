@@ -38,11 +38,12 @@ def out(): global out_buf; print("\t"*indent + out_buf); out_buf=""
 def check_err():
 	if not flag: print("ERROR"); sys.exit(1)
 def skip():
-	while input.peek(1)[:1] in b" \t\n": input.seek(1, 1)
+	if len(input.peek(1)[:1]):
+		while input.peek(1)[:1] in b" \t\n": input.seek(1, 1)
 def read(t):
 	global in_buf, flag;
 	skip(); n = input.peek(1)[:1].decode()
-	if not((t=="id" and n in string.printable[10:62]+".")
+	if not len(n) or not((t=="id" and n in string.printable[10:62]+".")
 		or (t=="str" and ord(n) == 39)
 		or (t=="num" and n in string.printable[:10])):
 		flag = 0; return
