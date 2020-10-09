@@ -2,13 +2,13 @@
 OUTA
 	TST '*'
 	BF L1
-	CL '		push(in_buf)'
+	CL 'push(in_buf)'
 	OUT
 L1
 	BT L2
 	SR
 	BF L3
-	CL '		push('
+	CL 'push('
 	CI
 	CL ')'
 	OUT
@@ -27,25 +27,25 @@ L5
 	BE
 	TST ')'
 	BE
-	CL '		out()'
+	CL 'out()'
 	OUT
 L4
 	BT L6
 	TST '{'
 	BF L7
-	CL '		indent+=1'
+	CL 'indent+=1'
 	OUT
 L7
 	BT L6
 	TST '}'
 	BF L8
-	CL '		indent-=1'
+	CL 'indent-=1'
 	OUT
 L8
 	BT L6
 	TST '\n'
 	BF L9
-	CL '		out()'
+	CL 'out()'
 	OUT
 L9
 L6
@@ -53,7 +53,7 @@ L6
 EX3
 	ID
 	BF L10
-	CL '		e_'
+	CL 'e_'
 	CI
 	CL '()'
 	OUT
@@ -61,7 +61,7 @@ L10
 	BT L11
 	SR
 	BF L12
-	CL '		get_literal('
+	CL 'get_literal('
 	CI
 	CL ')'
 	OUT
@@ -69,19 +69,19 @@ L12
 	BT L11
 	TST '.ID'
 	BF L13
-	CL '		get_tok()'
+	CL 'get_tok()'
 	OUT
 L13
 	BT L11
 	TST '.NUMBER'
 	BF L14
-	CL '		get_num()'
+	CL 'get_num()'
 	OUT
 L14
 	BT L11
 	TST '.STRING'
 	BF L15
-	CL '		get_str()'
+	CL 'get_str()'
 	OUT
 L15
 	BT L11
@@ -95,39 +95,48 @@ L16
 	BT L11
 	TST '.EMPTY'
 	BF L17
-	CL '		flag = 1'
+	CL 'flag = 1'
 	OUT
 L17
 	BT L11
 	TST '$'
 	BF L18
-	CL '		flag = 1'
+	CL 'flag = 1'
 	OUT
-	CL '		while flag:'
+	CL 'while flag:'
+	OUT
+	LB
+	CL '{'
 	OUT
 	CLL EX3
 	BE
+	LB
+	CL '}'
+	OUT
 L18
 L11
 	R
 EX2
 	CLL EX3
 	BF L19
-	CL '	if flag:'
+	CL 'if flag:'
 	OUT
 L19
 	BT L20
 	CLL OUTPUT
 	BF L21
-	CL '	if True:'
+	CL 'if True:'
 	OUT
 L21
 L20
 	BF L22
+	LB
+	CL '{'
+	OUT
 L23
 	CLL EX3
 	BF L24
-	CL '	check_err()'
+	CL 'check_err()'
 	OUT
 L24
 	BT L25
@@ -138,18 +147,24 @@ L25
 	BT L23
 	SET
 	BE
+	LB
+	CL '}'
+	OUT
 L22
 L27
 	R
 EX1
 	CL 'while True:'
 	OUT
+	LB
+	CL '{'
+	OUT
 	CLL EX2
 	BE
 L28
 	TST '/'
 	BF L29
-	CL '	if flag: break'
+	CL 'if flag: break'
 	OUT
 	CLL EX2
 	BE
@@ -158,7 +173,10 @@ L30
 	BT L28
 	SET
 	BE
-	CL '	break'
+	CL 'break'
+	OUT
+	LB
+	CL '}'
 	OUT
 L31
 L32
@@ -166,17 +184,20 @@ L32
 STATEMENT
 	ID
 	BF L33
-	LB
-	CL ''
-	OUT
 	CL 'def e_'
 	CI
 	CL '():'
 	OUT
 	TST '='
 	BE
+	LB
+	CL '{'
+	OUT
 	CLL EX1
 	BE
+	LB
+	CL '}'
+	OUT
 	TST ';'
 	BE
 L33

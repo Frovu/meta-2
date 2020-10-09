@@ -48,7 +48,7 @@ class METAII:
         self.SW = False
         self.IP = 0
         self.print_label = False
-        self.print_function = False
+        self.indent = 0
         self.lastLabel = 0
         self.stack = [['', '', len(self.program)]]
         self.input = [t.value for t in inputLexer().tokenize(input)]
@@ -120,15 +120,15 @@ class METAII:
             self.output = []
             if self.print_label:
                 if '.meta3' in sys.argv[2]:
-                    self.print_function = True
+                    self.indent += 1 if '{' in self.output_text else -1
+                    return
                 self.output_text += f'{p}\n'
                 self.print_label = False
             else:
-                if '.meta3' in sys.argv[2] and "'" in p and "\n" in p:
-                    p = p.replace("'", "'''")
-                if  self.print_function:
-                    self.print_function = False
-                    self.output_text += f'{p}\n'
+                if '.meta3' in sys.argv[2]:
+                    if "'" in p and "\n" in p:
+                        p = p.replace("'", "'''")
+                    self.output_text += "\t"*self.indent + p + '\n'
                 else:
                     self.output_text += f'\t{p}\n'
         elif order == 'ADR':

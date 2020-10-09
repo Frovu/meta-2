@@ -1,29 +1,31 @@
 .SYNTAX PROGRAM
 
-OUTA = '*' .OUT('		push(in_buf)')
-	/ .STRING .OUT('		push('*')').,
+OUTA = '*' .OUT('push(in_buf)')
+	/ .STRING .OUT('push('*')').,
 
-OUTPUT = '.out' '(' $OUTA ')' .OUT('		out()')
-	/ '{' .OUT('		indent+=1')
-	/ '}' .OUT('		indent-=1')
-	/ '\n' .OUT('		out()').,
+OUTPUT = '.out' '(' $OUTA ')' .OUT('out()')
+	/ '{' .OUT('indent+=1')
+	/ '}' .OUT('indent-=1')
+	/ '\n' .OUT('out()').,
 
-EX3 = .ID .OUT('		e_'*'()')
-	/ .STRING .OUT('		get_literal('*')')
-	/ '.ID'		 .OUT('		get_tok()')
-	/ '.NUMBER' .OUT('		get_num()')
-	/ '.STRING' .OUT('		get_str()')
+EX3 = .ID .OUT('e_'*'()')
+	/ .STRING .OUT('get_literal('*')')
+	/ '.ID' .OUT('get_tok()')
+	/ '.NUMBER' .OUT('get_num()')
+	/ '.STRING' .OUT('get_str()')
 	/ '(' EX1 ')'
-	/ '.EMPTY' .OUT('		flag = 1')
-	/ '$' .OUT('		flag = 1') .OUT('		while flag:') EX3 .,
+	/ '.EMPTY' .OUT('flag = 1')
+	/ '$' .OUT('flag = 1') .OUT('while flag:')
+		.LABEL '{' EX3  .LABEL '}'.,
 
-EX2 = (EX3 .OUT('	if flag:') / OUTPUT .OUT('	if True:'))
-	$(EX3 .OUT('	check_err()') / OUTPUT).,
+EX2 = (EX3 .OUT('if flag:') / OUTPUT .OUT('if True:'))
+	.LABEL '{' $(EX3 .OUT('check_err()') / OUTPUT) .LABEL '}'.,
 
-EX1 = .OUT('while True:') EX2 $('/' .OUT('	if flag: break') EX2 )
-.OUT('	break') .,
+EX1 = .OUT('while True:') .LABEL '{' EX2 $('/' .OUT('if flag: break') EX2 )
+.OUT('break') .LABEL '}' .,
 
-STATEMENT = .ID .LABEL '' .OUT('def e_' * '():') '=' EX1 ';'.,
+STATEMENT = .ID .OUT('def e_' * '():') '='
+	.LABEL '{' EX1 .LABEL '}'  ';'.,
 
 PROGRAM = '.SYNTAX' .ID .OUT('
 import string
