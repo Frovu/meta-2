@@ -119,11 +119,11 @@ class METAII:
             p = "".join(self.output)
             self.output = []
             if self.print_label:
-                if '.meta3' in sys.argv[2]:
-                    self.indent += 1 if '{' in self.output_text else -1
-                    return
-                self.output_text += f'{p}\n'
                 self.print_label = False
+                if '.meta3' in sys.argv[2]:
+                    self.indent += 1 if '{' in p else -1
+                else:
+                    self.output_text += f'{p}\n'
             else:
                 if '.meta3' in sys.argv[2]:
                     if "'" in p and "\n" in p:
