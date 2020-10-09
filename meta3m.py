@@ -33,10 +33,11 @@ def test(x):
 		input.seek(len(x), 1); flag = 1
 	else: flag = 0
 
+
 def e_ARG():
 	global flag, indent
 	while True:
-		test('*')
+		test( '*' )
 		if flag:
 			pass
 			push('push(in_buf)')
@@ -54,28 +55,28 @@ def e_ARG():
 def e_OUTPUT():
 	global flag, indent
 	while True:
-		test('.out')
+		test( '.out' )
 		if flag:
 			pass
-			test('(')
+			test( '(' )
 			check_err()
 			flag = 1
 			while flag:
 				e_ARG()
 			flag = 1
 			check_err()
-			test(')')
+			test( ')' )
 			check_err()
 			push('out()')
 			out()
 		if flag: break
-		test('{')
+		test( '{' )
 		if flag:
 			pass
 			push('indent+=1')
 			out()
 		if flag: break
-		test('}')
+		test( '}' )
 		if flag:
 			pass
 			push('indent-=1')
@@ -101,39 +102,39 @@ def e_EX3():
 			push(' )')
 			out()
 		if flag: break
-		test('.ID')
+		test( '.ID' )
 		if flag:
 			pass
 			push('read("id")')
 			out()
 		if flag: break
-		test('.NUMBER')
+		test( '.NUMBER' )
 		if flag:
 			pass
 			push('read("num")')
 			out()
 		if flag: break
-		test('.STRING')
+		test( '.STRING' )
 		if flag:
 			pass
 			push('read("str")')
 			out()
 		if flag: break
-		test('(')
+		test( '(' )
 		if flag:
 			pass
 			e_EX1()
 			check_err()
-			test(')')
+			test( ')' )
 			check_err()
 		if flag: break
-		test('.EMPTY')
+		test( '.EMPTY' )
 		if flag:
 			pass
 			push('flag = 1')
 			out()
 		if flag: break
-		test('$')
+		test( '$' )
 		if flag:
 			pass
 			push('flag = 1')
@@ -200,7 +201,7 @@ def e_EX1():
 			flag = 1
 			while flag:
 				while True:
-					test('/')
+					test( '/' )
 					if flag:
 						pass
 						push('if flag: break')
@@ -225,7 +226,7 @@ def e_STATEMENT():
 			push(in_buf)
 			push('():')
 			out()
-			test('=')
+			test( '=' )
 			check_err()
 			indent+=1
 			push('global flag, indent')
@@ -233,7 +234,7 @@ def e_STATEMENT():
 			e_EX1()
 			check_err()
 			indent-=1
-			test(';')
+			test( ';' )
 			check_err()
 			push('')
 			out()
@@ -286,7 +287,7 @@ def test(x):
 				e_STATEMENT()
 			flag = 1
 			check_err()
-			test('.SYNTAX')
+			test( '.SYNTAX' )
 			check_err()
 			read("id")
 			check_err()

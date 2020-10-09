@@ -5,8 +5,7 @@ OUTA = '*' .OUT('push(in_buf)')
 
 OUTPUT = '.out' '(' $OUTA ')' .OUT('out()')
 	/ '{' .OUT('indent+=1')
-	/ '}' .OUT('indent-=1')
-	/ '\n' .OUT('out()').,
+	/ '}' .OUT('indent-=1').,
 
 EX3 = .ID .OUT('e_'*'()')
 	/ .STRING .OUT('test('*')')
@@ -16,7 +15,7 @@ EX3 = .ID .OUT('e_'*'()')
 	/ '(' EX1 ')'
 	/ '.EMPTY' .OUT('flag = 1')
 	/ '$' .OUT('flag = 1') .OUT('while flag:')
-		.LABEL '{' EX3  .LABEL '}'.,
+		.LABEL '{' EX3  .LABEL '}' .OUT('flag = 1').,
 
 EX2 = (EX3 .OUT('if flag:') / OUTPUT .OUT('if True:'))
 	.LABEL '{' .OUT('pass') $(EX3 .OUT('check_err()') / OUTPUT) .LABEL '}'.,
@@ -34,16 +33,18 @@ out_buf = ""
 in_buf = ""
 flag = 1
 def push(x): global out_buf; out_buf += x
-def out(): global out_buf; print("\t"*indent + out_buf); out_buf=""
+def escape(x):
+	return x.replace(chr(39), chr(39)*3) if chr(39) in x and chr(10) in x else x
+def out(): global out_buf; print(chr(9)*indent + out_buf); out_buf=""
 def check_err():
-	if not flag: print("ERROR"); sys.exit(1)
+	if not flag: raise Exception("ERROR"); sys.exit(1)
 def skip():
 	if len(input.peek(1)[:1]):
-		while input.peek(1)[:1] in b" \t\n": input.seek(1, 1)
+		while input.peek(1)[:1] in bytes([9,10,32]): input.seek(1, 1)
 def read(t):
 	global in_buf, flag;
 	skip(); n = input.peek(1)[:1].decode()
-	if not len(n) or not((t=="id" and n in string.printable[10:62]+".")
+	if not len(n) or not((t=="id" and n in string.printable[10:62])
 		or (t=="str" and ord(n) == 39)
 		or (t=="num" and n in string.printable[:10])):
 		flag = 0; return
@@ -53,7 +54,7 @@ def read(t):
 			or (t=="str" and ord(n) != 39)
 			or (t=="num" and n in string.printable[:10])): break
 		in_buf += n; input.seek(1, 1)
-	if t=="str": in_buf += n
+	if t=="str": in_buf = escape(in_buf + n); input.seek(1, 1)
 def test(x):
 	skip(); global flag
 	if input.peek(len(x))[:len(x)] == x.encode():

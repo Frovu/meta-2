@@ -1,28 +1,27 @@
-OUTA = '*' .out('push(in_buf)')
+ARG = '*' .out('push(in_buf)')
 	/ .STRING .out('push('*')');
 
-OUTPUT = '.out' '(' $OUTA ')' .out('out()')
+OUTPUT = '.out' '(' $ ARG ')' .out('out()')
 	/ '{' .out('indent+=1')
-	/ '}' .out('indent-=1')
-	/ '\n' .out('out()');
+	/ '}' .out('indent-=1');
 
 EX3 = .ID .out('e_'*'()')
 	/ .STRING .out('test( '*' )')
-	/ '.ID'		 .out('read("id")')
+	/ '.ID' .out('read("id")')
 	/ '.NUMBER' .out('read("num")')
 	/ '.STRING' .out('read("str")')
 	/ '(' EX1 ')'
 	/ '.EMPTY' .out('flag = 1')
-	/ '$' .out('flag = 1') .out('while flag:') { EX3 } ;
+	/ '$' .out('flag = 1') .out('while flag:') { EX3 } .out('flag = 1');
 
 EX2 = (EX3 .out('if flag:') / OUTPUT .out('if True:'))
-	{ $(EX3 .out('check_err()') / OUTPUT) };
+	{ .out('pass') $(EX3 .out('check_err()') / OUTPUT) };
 
 EX1 = .out('while True:') { EX2 $('/' .out('if flag: break') EX2 )
 .out('break') } ;
 
-STATEMENT = .ID .out('def e_' * '():') .out('global flag, indent')
-	'=' { EX1 } ';' .out('');
+STATEMENT = .ID .out('def e_' * '():') '='
+	{ .out('global flag, indent') EX1 } ';' .out('');
 
 PROGRAM = .out('import string
 import sys
@@ -31,16 +30,18 @@ out_buf = ""
 in_buf = ""
 flag = 1
 def push(x): global out_buf; out_buf += x
-def out(): global out_buf; print("\t"*indent + out_buf); out_buf=""
+def escape(x):
+	return x.replace(chr(39), chr(39)*3) if chr(39) in x and chr(10) in x else x
+def out(): global out_buf; print(chr(9)*indent + out_buf); out_buf=""
 def check_err():
-	if not flag: print("ERROR"); sys.exit(1)
+	if not flag: raise Exception("ERROR"); sys.exit(1)
 def skip():
 	if len(input.peek(1)[:1]):
-		while input.peek(1)[:1] in b" \t\n": input.seek(1, 1)
+		while input.peek(1)[:1] in bytes([9,10,32]): input.seek(1, 1)
 def read(t):
 	global in_buf, flag;
 	skip(); n = input.peek(1)[:1].decode()
-	if not len(n) or not((t=="id" and n in string.printable[10:62]+".")
+	if not len(n) or not((t=="id" and n in string.printable[10:62])
 		or (t=="str" and ord(n) == 39)
 		or (t=="num" and n in string.printable[:10])):
 		flag = 0; return
@@ -50,7 +51,7 @@ def read(t):
 			or (t=="str" and ord(n) != 39)
 			or (t=="num" and n in string.printable[:10])): break
 		in_buf += n; input.seek(1, 1)
-	if t=="str": in_buf += n
+	if t=="str": in_buf = escape(in_buf + n); input.seek(1, 1)
 def test(x):
 	skip(); global flag
 	if input.peek(len(x))[:len(x)] == x.encode():
