@@ -6,32 +6,41 @@ import re
 class inputLexer(Lexer):
     tokens = { NAME, STRING, SEMICOLON, L1, L2, ASTERISK,
         OR, EQUAL, LPAREN, RPAREN, SEQ}
-    ignore = ' \t\n'
     SEMICOLON = r'\.\,'
     L1 = r'\*1'
     L2 = r'\*2'
     ASTERISK = r'\*'
     NAME   = r'[\.a-zA-Z][a-zA-Z0-9]*'
-    STRING = r'\'[^\']+\''
+    STRING = r'\'[^\']*\''
     SEQ    = r'\$'
     OR     = r'/'
     EQUAL  = r'='
     LPAREN = r'\('
     RPAREN = r'\)'
+    ignore = ' \t\n'
+class progLexer(Lexer):
+    tokens = { CMD, STRING, LABEL, ARG }
+    ignore = ' '
+    CMD = r'\n?\t[A-Z0-9]+'
+    LABEL = r'\n[A-Z0-9]+'
+    ARG = r'[A-Z0-9]+'
+    STRING = r'\'[^\']+\''
 
 class METAII:
     def parse(self, text):
         self.labels = {}
         self.program = []
         counter = 0
-        for line in text.splitlines():
-            if line[0] == '\t' or line[0] == ' ':
-                cmd = line.strip().split()[0]
-                arg = "".join(line.strip().split()[1:]).strip("'")
-                self.program.append((cmd, arg))
+        toks = [t for t in progLexer().tokenize(text[:-1])]
+        for tok in toks:
+            value = tok.value.strip()
+            if tok.type == 'CMD':
+                self.program.append([value, ''])
                 counter += 1
+            elif tok.type == 'LABEL':
+                self.labels[value] = counter
             else:
-                self.labels[line.strip()] = counter
+                self.program[-1][1] = value.strip("'")
 
     def __init__(self, program, input, output_filename):
         self.parse(program)
@@ -62,7 +71,7 @@ class METAII:
         inp = self.input[0] if len(self.input) else ''
         order = command[0]
         arg = command[1]
-        #print(f'{self.IP}:\t{order}\t({arg})\t<- {inp}')
+        print(f'{self.IP}:\t{order}\t({arg})\t<- {inp}')
         if order == 'TST':
             if inp == arg:
                 self.SW = True
@@ -88,9 +97,11 @@ class METAII:
             self.IP = self.labels[arg]
         elif order == 'BT':
             if self.SW:
+                print(f'branching t')
                 self.IP = self.labels[arg]
         elif order == 'BF':
             if not self.SW:
+                print(f'branching f')
                 self.IP = self.labels[arg]
         elif order == 'CL':
             self.output.append(str(arg))
@@ -128,14 +139,18 @@ class METAII:
         inp = self.input[0]
         if(type == 'ID' and re.match(r'[a-zA-Z][a-zA-Z]*', inp)
         or type == 'NUM' and re.match(r'\d+', inp)
-        or type == 'SR' and re.match(r'\'[^\']+\'', inp)):
+        or type == 'SR' and re.match(r'\'[^\']*\'', inp)):
             self.SW = 1
             self.token_buffer = self.input.pop(0)
+            print(f'read tok: ({type})\t{inp}')
         else:
             self.SW = 0
 
-
-with open('meta2.meta2') as file:
-    prog = file.read()
-with open('meta2.m2asm') as file:
-    meta = METAII(file.read(), prog, 'test.m2asm')
+import sys
+if len(sys.argv) < 3:
+    print(f'Usage: {sys.argv[0]} <program> <input> <output>')
+else:
+    with open(sys.argv[2]) as file:
+        prog = file.read()
+    with open(sys.argv[1]+'.m2asm') as file:
+        meta = METAII(file.read(), prog, sys.argv[3])
