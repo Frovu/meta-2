@@ -1,11 +1,12 @@
+
 import string
 import sys
 indent = 0
 out_buf = ""
 in_buf = ""
 flag = 0
-def push(x): out_buf += x
-def out(): print("\t"*indent + out_buf); out_buf=""
+def push(x): global out_buf; out_buf += x
+def out(): global out_buf; print("\t"*indent + out_buf); out_buf=""
 def check_err():
 	if flag: print("ERROR"); sys.exit(1)
 def skip():
@@ -28,22 +29,15 @@ def test(x):
 		input.seek(len(x), 1); flag = 1
 	else: flag = 0
 
-if len(sys.argv) < 2:
-	print(f"Usage: {sys.argv[0]} <program_file>")
-else:
-	input = open(sys.argv[1], "rb")
-	e_PROGRAM()
-
-
 def e_OUTA():
 	while True:
-		get_literal('*')
+		test('*')
 		if flag:
 			pass
 			push('push(in_buf)')
 			out()
 		if flag: break
-		get_str()
+		read("str")
 		if flag:
 			pass
 			push('push(')
@@ -51,43 +45,45 @@ def e_OUTA():
 			push(')')
 			out()
 		break
+
 def e_OUTPUT():
 	while True:
-		get_literal('.out')
+		test('.out')
 		if flag:
 			pass
-			get_literal('(')
+			test('(')
 			check_err()
 			flag = 1
 			while flag:
 				e_OUTA()
 			check_err()
-			get_literal(')')
+			test(')')
 			check_err()
 			push('out()')
 			out()
 		if flag: break
-		get_literal('{')
+		test('{')
 		if flag:
 			pass
 			push('indent+=1')
 			out()
 		if flag: break
-		get_literal('}')
+		test('}')
 		if flag:
 			pass
 			push('indent-=1')
 			out()
 		if flag: break
-		get_literal('\n')
+		test('\n')
 		if flag:
 			pass
 			push('out()')
 			out()
 		break
+
 def e_EX3():
 	while True:
-		get_tok()
+		read("id")
 		if flag:
 			pass
 			push('e_')
@@ -95,7 +91,7 @@ def e_EX3():
 			push('()')
 			out()
 		if flag: break
-		get_str()
+		read("str")
 		if flag:
 			pass
 			push('test( ')
@@ -103,39 +99,39 @@ def e_EX3():
 			push(' )')
 			out()
 		if flag: break
-		get_literal('.ID')
+		test('.ID')
 		if flag:
 			pass
 			push('read("id")')
 			out()
 		if flag: break
-		get_literal('.NUMBER')
+		test('.NUMBER')
 		if flag:
 			pass
 			push('read("num")')
 			out()
 		if flag: break
-		get_literal('.STRING')
+		test('.STRING')
 		if flag:
 			pass
 			push('read("str")')
 			out()
 		if flag: break
-		get_literal('(')
+		test('(')
 		if flag:
 			pass
 			e_EX1()
 			check_err()
-			get_literal(')')
+			test(')')
 			check_err()
 		if flag: break
-		get_literal('.EMPTY')
+		test('.EMPTY')
 		if flag:
 			pass
 			push('flag = 1')
 			out()
 		if flag: break
-		get_literal('$')
+		test('$')
 		if flag:
 			pass
 			push('flag = 1')
@@ -147,6 +143,7 @@ def e_EX3():
 			check_err()
 			indent-=1
 		break
+
 def e_EX2():
 	while True:
 		while True:
@@ -181,6 +178,7 @@ def e_EX2():
 			check_err()
 			indent-=1
 		break
+
 def e_EX1():
 	while True:
 		push('while True:')
@@ -193,7 +191,7 @@ def e_EX1():
 			flag = 1
 			while flag:
 				while True:
-					get_literal('/')
+					test('/')
 					if flag:
 						pass
 						push('if flag: break')
@@ -206,9 +204,10 @@ def e_EX1():
 			out()
 			indent-=1
 		break
+
 def e_STATEMENT():
 	while True:
-		get_tok()
+		read("id")
 		if flag:
 			pass
 			push('def e_')
@@ -217,32 +216,28 @@ def e_STATEMENT():
 			out()
 			push('global flag, indent')
 			out()
-			get_literal('=')
+			test('=')
 			check_err()
 			indent+=1
 			e_EX1()
 			check_err()
 			indent-=1
-			get_literal(';')
+			test(';')
 			check_err()
 			push('')
 			out()
 		break
+
 def e_PROGRAM():
 	while True:
-		get_literal('.SYNTAX')
-		if flag:
-			pass
-			get_tok()
-			check_err()
-			push('''import string
+		push('''import string
 import sys
 indent = 0
 out_buf = ""
 in_buf = ""
 flag = 0
-def push(x): out_buf += x
-def out(): print("\t"*indent + out_buf); out_buf=""
+def push(x): global out_buf; out_buf += x
+def out(): global out_buf; print("\t"*indent + out_buf); out_buf=""
 def check_err(): if flag: print("ERROR"); sys.exit(1)
 def skip():
 		while input.peek(1)[:1] in b" \t\n": input.seek(1, 1)
@@ -264,20 +259,34 @@ def test(x):
 				input.seek(len(x), 1); flag = 1
 		else: flag = 0
 
-if len(sys.argv) < 1:
-	print(f"Usage: {sys.argv[0]} <program_file>")
-else:
-	input = open(sys.argv[1], "rb")
-	''')
-			push(in_buf)
-			push('''()
-
 ''')
-			out()
+		out()
+		if True:
+			pass
 			flag = 1
 			while flag:
 				e_STATEMENT()
 			check_err()
-			get_literal('.END')
+			test('.SYNTAX')
 			check_err()
+			read("id")
+			check_err()
+			push('''
+
+if len(sys.argv) < 2:
+	print(f"Usage: {sys.argv[0]} <program_file>")
+else:
+	input = open(sys.argv[1], "rb")
+	e_''')
+			push(in_buf)
+			push('()')
+			out()
 		break
+
+
+
+if len(sys.argv) < 2:
+	print(f"Usage: {sys.argv[0]} <program_file>")
+else:
+	input = open(sys.argv[1], "rb")
+	e_PROGRAM()

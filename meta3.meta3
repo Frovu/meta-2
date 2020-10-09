@@ -1,5 +1,3 @@
-.SYNTAX PROGRAM
-
 OUTA = '*' .out('push(in_buf)')
 	/ .STRING .out('push('*')');
 
@@ -26,14 +24,14 @@ EX1 = .out('while True:') { EX2 $('/' .out('if flag: break') EX2 )
 STATEMENT = .ID .out('def e_' * '():') .out('global flag, indent')
 	'=' { EX1 } ';' .out('');
 
-PROGRAM = '.SYNTAX' .ID .out('import string
+PROGRAM = .out('import string
 import sys
 indent = 0
 out_buf = ""
 in_buf = ""
 flag = 0
-def push(x): out_buf += x
-def out(): print("\t"*indent + out_buf); out_buf=""
+def push(x): global out_buf; out_buf += x
+def out(): global out_buf; print("\t"*indent + out_buf); out_buf=""
 def check_err(): if flag: print("ERROR"); sys.exit(1)
 def skip():
 		while input.peek(1)[:1] in b" \t\n": input.seek(1, 1)
@@ -55,12 +53,11 @@ def test(x):
 				input.seek(len(x), 1); flag = 1
 		else: flag = 0
 
-if len(sys.argv) < 1:
+') $ STATEMENT '.SYNTAX' .ID .out('
+if len(sys.argv) < 2:
 	print(f"Usage: {sys.argv[0]} <program_file>")
 else:
 	input = open(sys.argv[1], "rb")
-	' * '()
+	e_' * '()');
 
-') $ STATEMENT '.END';
-
-.END
+.SYNTAX PROGRAM

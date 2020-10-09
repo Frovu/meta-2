@@ -75,6 +75,8 @@ class METAII:
         arg = command[1]
         #print(f'{self.IP}:\t{order}\t({arg})\t<- {inp}')
         if order == 'TST':
+            #if '.meta3' in sys.argv[2]:
+            #    print(f'test: {inp} == {arg}')
             if inp == arg:
                 self.SW = True
                 self.input.pop(0)
@@ -105,6 +107,10 @@ class METAII:
             if not self.SW:
                 #print(f'branching f')
                 self.IP = self.labels[arg]
+        elif order == 'BE':
+            if not self.SW:
+                print(f'PANIC!')
+                self.program = []
         elif order == 'CL':
             self.output.append(str(arg))
         elif order == 'CI':
@@ -152,7 +158,8 @@ class METAII:
         or type == 'SR' and re.match(r'\'[^\']*\'', inp)):
             self.SW = 1
             self.token_buffer = self.input.pop(0)
-            #print(f'read tok: ({type})\t{inp}')
+            #if '.meta3' in sys.argv[2]:
+            #    print(f'read tok: ({type})\t{inp}')
         else:
             self.SW = 0
 
