@@ -40,26 +40,25 @@ def e_ARG():
 		test( '*' )
 		if flag:
 			pass
-			push('push(in_buf)')
+			push('+in_buf')
 			out()
 		if flag: break
 		read("str")
 		if flag:
 			pass
-			push('push(')
+			push('+')
 			push(in_buf)
-			push(')')
 			out()
 		break
 
 def e_OUTPUT():
 	global flag, indent
 	while True:
-		test( '.out' )
+		test( '.out(' )
 		if flag:
 			pass
-			test( '(' )
-			check_err()
+			push('out(""')
+			out()
 			flag = 1
 			while flag:
 				e_ARG()
@@ -67,7 +66,7 @@ def e_OUTPUT():
 			check_err()
 			test( ')' )
 			check_err()
-			push('out()')
+			push(')\n')
 			out()
 		if flag: break
 		test( '{' )
@@ -97,9 +96,9 @@ def e_EX3():
 		read("str")
 		if flag:
 			pass
-			push('test( ')
+			push('test(')
 			push(in_buf)
-			push(' )')
+			push(')')
 			out()
 		if flag: break
 		test( '.ID' )
@@ -246,13 +245,11 @@ def e_PROGRAM():
 		push('''import string
 import sys
 indent = 0
-out_buf = ""
 in_buf = ""
 flag = 1
-def push(x): global out_buf; out_buf += x
 def escape(x):
 	return x.replace(chr(39), chr(39)*3) if chr(39) in x and chr(10) in x else x
-def out(): global out_buf; print(chr(9)*indent + out_buf); out_buf=""
+def out(x): print(chr(9)*indent + x, end="");
 def check_err():
 	if not flag: raise Exception("ERROR"); sys.exit(1)
 def skip():

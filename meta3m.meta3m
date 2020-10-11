@@ -1,0 +1,66 @@
+ARG = '*' .out('+in_buf')
+	/ .STRING .out('+'*);
+
+OUTPUT = '.out(' .out('\tout(""') $ARG ')' .out(')\n')
+	/ '{' .out('\tindent+=1\n')
+	/ '}' .out('\tindent-=1\n');
+
+EX3 = .ID .out('\te_'*'()\n')
+	/ .STRING .out('\ttest('*')\n')
+	/ '.ID' .out('\tread("id")\n')
+	/ '.NUMBER' .out('\tread("num")\n')
+	/ '.STRING' .out('\tread("str")\n')
+	/ '(' EX1 ')'
+	/ '.EMPTY' .out('\tflag = 1\n')
+	/ '$' .out('\tflag = 1\n') .out('\twhile flag:\n') { EX3 } .out('\tflag = 1\n');
+
+EX2 = (EX3 .out('\tif flag:\n') / OUTPUT .out('\tif True:\n'))
+	{ .out('\tpass\n') $(EX3 .out('\tcheck_err()\n') / OUTPUT) };
+
+EX1 = .out('\twhile True:\n') { EX2 $('/' .out('\tif flag: break\n') EX2 )
+.out('\tbreak\n') } ;
+
+STATEMENT = .ID .out('def e_' * '():\n') '='
+	{ .out('\tglobal flag, indent\n') EX1 } ';' .out('\n');
+
+PROGRAM = .out('import string
+import sys
+indent = 0
+in_buf = ""
+flag = 1
+def escape(x):
+	return x.replace(chr(39), chr(39)*3) if chr(39) in x and chr(10) in x else x
+def out(x): print((chr(9)*indent + x[1:]) if ord(x[0])==9 else x, end="");
+def check_err():
+	if not flag: raise Exception("ERROR"); sys.exit(1)
+def skip():
+	if len(input.peek(1)[:1]):
+		while input.peek(1)[:1] in bytes([9,10,32]): input.seek(1, 1)
+def read(t):
+	global in_buf, flag;
+	skip(); n = input.peek(1)[:1].decode()
+	if not len(n) or not((t=="id" and n in string.printable[10:62])
+		or (t=="str" and ord(n) == 39)
+		or (t=="num" and n in string.printable[:10])):
+		flag = 0; return
+	in_buf = n; input.seek(1, 1); flag = 1
+	while n := input.peek(1)[:1].decode():
+		if not ((t=="id" and n in string.printable[:62])
+			or (t=="str" and ord(n) != 39)
+			or (t=="num" and n in string.printable[:10])): break
+		in_buf += n; input.seek(1, 1)
+	if t=="str": in_buf = escape(in_buf + n); input.seek(1, 1)
+def test(x):
+	skip(); global flag
+	if input.peek(len(x))[:len(x)] == x.encode():
+		input.seek(len(x), 1); flag = 1
+	else: flag = 0
+
+') $ STATEMENT '.SYNTAX' .ID .out('
+if len(sys.argv) < 2:
+	print(f"Usage: {sys.argv[0]} <program_file>")
+else:
+	input = open(sys.argv[1], "rb")
+	e_' * '()');
+
+.SYNTAX PROGRAM
