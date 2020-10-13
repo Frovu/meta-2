@@ -20,7 +20,7 @@
 
 (define buffer "") ; input token buffer
 (define (err)
-	(display "error occured")
+	(display "\n\nerror parsing\n")
 	(exit 1))
 (define (skip-whitespace)
 	(let ([ch (peek-char )])
@@ -71,7 +71,7 @@
 				#f))))
 
 (define (output . args)
-	(printf (string-join args "")))
+	(printf (string-join args "")) #t)
 
 (define (while-rec check i)
 	(cond [(> i 10) #f]

@@ -9,10 +9,11 @@ exp_atom = .ID <'(e-'*')'>
 	/ '.EMPTY' <'#t'>
 	/ '$' <'(while-ok (lambda () '> exp_atom <'))'>;
 
-exp_body = <'\n\t\t\t'> $(output <'\n\t\t\t'> / exp_atom_crit <'\n\t\t\t'>);
+exp_body = <' (if (not (and\n\t\t\t'>
+	$(output / exp_atom <'\n\t\t\t'>) <')) (err) #t)'>;
 
-exp_option =  output <'(begin'> exp_body <'#t)'>
-	/ <'(if '>exp_atom<' (begin'> exp_body <'#t) #f)'> ;
+exp_option =  output exp_body
+	/ <'(if '>exp_atom exp_body <' #f)'> ;
 
 expression = <'(cond\n\t\t['> exp_option <']'>
 		$('/' <'\n\t\t['> exp_option <']'>) <'\n\t\t[else #f])'>;
