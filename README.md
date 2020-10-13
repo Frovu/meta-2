@@ -4,6 +4,21 @@ me studying compiler writing languages with META II
 ## Source
 http://ibm-1401.info/Meta-II-schorre.pdf
 
+## Meta 3 Racket
+
+Meta II that is being compiled to Racket(Scheme) script.
+
+### Meta 3 Racket files
+
+| File          | Contents                                                      |
+| -----------   | --------------------------------------------------------------|
+| `meta.rkt`    | Helper module mainly with i/o procedures                      |
+| `meta3l.m3l`  | First version written in its own language                     |
+| `meta3r.m3r`  | Improved/optimized version written in its own language        |
+| `meta3l.rkt`  | My first meta3 compiler written by hand                       |
+| `o_meta3l.rkt`| First version compiled itself                                 |
+| `o_meta3r.rkt`| Better version compiled itself                                |
+
 ## Meta 2
 
 Meta II with virtual machine simulating one from the paper
