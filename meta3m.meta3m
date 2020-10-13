@@ -1,20 +1,23 @@
-ARG = '*' .out('+in_buf')
-	/ .STRING .out('+'*);
+ARG = '*' .out(' + in_buf')
+	/ .STRING .out(' + '*);
 
 OUTPUT = '.out(' .out('\tout(""') $ARG ')' .out(')\n')
-	/ '{' .out('\tindent+=1\n')
-	/ '}' .out('\tindent-=1\n');
+	/ '{' .out('\tindent += 1\n')
+	/ '}' .out('\tindent -= 1\n');
 
 EX3 = .ID .out('\te_'*'()\n')
 	/ .STRING .out('\ttest('*')\n')
 	/ '.ID' .out('\tread("id")\n')
 	/ '.NUMBER' .out('\tread("num")\n')
-	/ '.STRING' .out('\tread("str")\n')
-	/ '(' EX1 ')'
-	/ '.EMPTY' .out('\tflag = 1\n')
-	/ '$' .out('\tflag = 1\n') .out('\twhile flag:\n') { EX3 } .out('\tflag = 1\n');
+	/ '.STRING' .out('\tread("str")\n')=
+	/ '.EMPTY' .out('\tflag := 1\n');
 
-EX2 = (EX3 .out('\tif flag:\n') / OUTPUT .out('\tif True:\n'))
+EX3N = '(' EX1 ')' /
+	'$' .out('\tflag = 1\n') .out('\twhile flag:\n') { EX3N / EX3 } .out('\tflag = 1\n');
+
+EX2 = ( EX3N .out('\tif flag:\n')
+				/ OUTPUT .out('\tif True:\n')
+				/ .out('\tif ') EX3 .out(':\n') )
 	{ .out('\tpass\n') $(EX3 .out('\tcheck_err()\n') / OUTPUT) };
 
 EX1 = .out('\twhile True:\n') { EX2 $('/' .out('\tif flag: break\n') EX2 )

@@ -1,0 +1,81 @@
+out_arg = .STRING .out(' + '*)
+	/ '*' .out(' + in_buf')
+	/ '.fn' .out(' + fn.pop()')
+	/ '.genfn' .out(' + genfn()');
+
+out = '.out(' .out('\tout(""') $ out_arg ')' .out(')\n')
+	/ '{' .out('\tindent += 1\n')
+	/ '}' .out('\tindent -= 1\n');
+
+atom_cond = .ID .out('st_'*'()')
+	/ .STRING .out('test('*')')
+	/ '.ID' .out('read("id")')
+	/ '.NUMBER' .out('read("num")')
+	/ '.STRING' .out('read("str")')
+	/ '.EMPTY' .out('True');
+
+atom_cond_critical = .ID .out('\tif not st_'*'(): err()\n')
+	/ .STRING    .out('\tif not test('*'): err()\n')
+	/ '.ID'		  .out('\tif not read("id"): err()\n')
+	/ '.NUMBER' .out('\tif not read("num"): err()\n')
+	/ '.STRING' .out('\tif not read("str"): err()\n')
+	/ '.EMPTY' 	.out('\t#empty\n');
+
+nested = '(' .out('\tdef '.genfn':\n') { statement } ')' .out('\t'.fn'\n')
+
+loop = '$' .STRING .out('\tflag = 1\n').out('\twhile flag:\n') { statement_atom };
+
+statement_atom = nested / loop / out / atom_cond_critical;
+
+statement_option = (atom_loop / out) $statement_atom
+	/ .out('\tif ') atom_cond .out(':\n') { $statement_atom } )
+	.out('\tif flag: return 1\n');
+
+statement = statement_option $('/' statement_option);
+
+rule = .ID .out('def st_' * '():\n') '='
+	{ .out('\tglobal flag, indent\n') statement } ';' .out('\n');
+
+program = .out('import string
+import sys
+indent = 0
+in_buf = ""
+fn = []
+fn_gen = (f"fn_{i}()" for i in range(9999))
+def genfn(): global fn; fn.append(next(fn_gen)); return fn[-1];
+def escape(x):
+	return x.replace(chr(39), chr(39)*3) if chr(39) in x and chr(10) in x else x
+def out(x): print((chr(9)*indent + x[1:]) if ord(x[0])==9 else x, end="");
+def err(): raise Exception(f"ERROR! inp={in_buf}"); sys.exit(1)
+def skip():
+	if len(input.peek(1)[:1]):
+		while input.peek(1)[:1] in bytes([9,10,32]): input.seek(1, 1)
+def read(t):
+	global in_buf;
+	skip(); n = input.peek(1)[:1].decode()
+	if not len(n) or not((t=="id" and n in string.printable[10:62])
+		or (t=="str" and ord(n) == 39)
+		or (t=="num" and n in string.printable[:10])):
+		return False;
+	in_buf = n; input.seek(1, 1)
+	while n := input.peek(1)[:1].decode():
+		if not ((t=="id" and n in string.printable[:62]+"_")
+			or (t=="str" and ord(n) != 39)
+			or (t=="num" and n in string.printable[:10])): break
+		in_buf += n; input.seek(1, 1)
+	if t=="str": in_buf = escape(in_buf + n); input.seek(1, 1)
+	return True
+def test(x):
+	skip()
+	if input.peek(len(x))[:len(x)] == x.encode():
+		input.seek(len(x), 1); return True
+	else: return False
+
+') $ rule '.SYNTAX' .ID .out('
+if len(sys.argv) < 2:
+	print(f"Usage: {sys.argv[0]} <program_file>")
+else:
+	input = open(sys.argv[1], "rb")
+	e_' * '()');
+
+.SYNTAX program
