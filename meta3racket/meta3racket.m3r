@@ -1,0 +1,26 @@
+output = '<' <'(output'> $('*' <' buffer'> / .STRING <' '*>) '>' <')'>;
+
+exp_atom = .ID <'(e-'*')'>
+	/ .STRING <'(test '*')'>
+	/ '.ID' <'(read-id)'>
+	/ '.NUMBER' <'(read-num)'>
+	/ '.STRING' <'(read-str)'>
+	/ '(' expression ')'
+	/ '.EMPTY' <'#t'>
+	/ '$' <'(while-ok (lambda () '> exp_atom <'))'>;
+
+exp_body = <'\n\t\t\t'> $(output <'\n\t\t\t'> / exp_atom_crit <'\n\t\t\t'>);
+
+exp_option =  output <'(begin'> exp_body <'#t)'>
+	/ <'(if '>exp_atom<' (begin'> exp_body <'#t) #f)'> ;
+
+expression = <'(cond\n\t\t['> exp_option <']'>
+		$('/' <'\n\t\t['> exp_option <']'>) <'\n\t\t[else #f])'>;
+
+statement = .ID <'\n(define (e-'*')\n\t'> '=' expression ';' <')\n'>;
+
+compiler = <'#lang racket\n(require \"meta.rkt\")\n'>
+	$statement '.SYNTAX' .ID
+	<'\n(unless (e-'*') \"\\nfailed\")'>;
+
+.SYNTAX compiler
