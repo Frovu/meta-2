@@ -10,8 +10,13 @@
 (provide while-ok)
 (provide buffer)
 
-(current-input-port (open-input-file "test"))
-(current-output-port (open-output-file "test.rkt" #:exists 'replace))
+(cond [(< (vector-length (current-command-line-arguments)) 2)
+	(display "please provide input and output files as arguements\n")
+	(exit 1)])
+(define in-f (vector-ref (current-command-line-arguments) 0))
+(define out-f (vector-ref (current-command-line-arguments) 1))
+(current-input-port (open-input-file in-f))
+(current-output-port (open-output-file out-f #:exists 'replace))
 
 (define buffer "") ; input token buffer
 (define (err)

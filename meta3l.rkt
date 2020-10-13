@@ -71,14 +71,14 @@
 
 (define (e-statement)
 	(if (read-id) (begin
-	(output "(define (e-" buffer ")\n\t")
+	(output "\n(define (e-" buffer ")\n\t")
 	(test "=")
 	(e-expression)
 	(test ";")
 	(output ")\n") #t) #f))
 
 (define (e-compiler)
-	(output "#lang racket\n(require \"meta.rkt\")\n\n")
+	(output "#lang racket\n(require \"meta.rkt\")\n")
 	(while-ok e-statement)
 	(test ".SYNTAX")
 	(read-id)

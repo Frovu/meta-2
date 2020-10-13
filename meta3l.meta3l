@@ -9,27 +9,27 @@ exp_atom = .ID <'(e-'*')'>
 	/ '.EMPTY' <'#t'>
 	/ '$' <'(while-ok (lambda () '> exp_atom <'))'>;
 
-exp_atom_crit = .ID <'(unless (e-'*') (err)'>
-	/ .STRING <'(unless (test '*') (err)'>
-	/ '.ID'   <'(unless (read-id) (err)'>
-	/ '.NUMBER' <'(unless (read-num) (err)'>
-	/ '.STRING' <'(unless (read-str) (err)'>
+exp_atom_crit = .ID <'(unless (e-'*') (err))'>
+	/ .STRING <'(unless (test '*') (err))'>
+	/ '.ID'   <'(unless (read-id) (err))'>
+	/ '.NUMBER' <'(unless (read-num) (err))'>
+	/ '.STRING' <'(unless (read-str) (err))'>
 	/ '(' <'(if '> expression ')' <' #t (err))'>
 	/ '.EMPTY' <'#t'>
-	/ '$' <'(while-ok (lambda () '> exp_atom <')'>;
+	/ '$' <'(while-ok (lambda () '> exp_atom <'))'>;
 
 exp_body = <'\n\t\t\t'> $(output <'\n\t\t\t'> / exp_atom_crit <'\n\t\t\t'>);
 
-exp_option =  output <'(begin '> exp_body <' #t)'>
-	/ <'(if '>exp_atom<' (begin '> exp_body <' #t) #f)'> ;
+exp_option =  output <'(begin'> exp_body <'#t)'>
+	/ <'(if '>exp_atom<' (begin'> exp_body <'#t) #f)'> ;
 
 expression = <'(cond\n\t\t['> exp_option <']'>
 		$('/' <'\n\t\t['> exp_option <']'>) <'\n\t\t[else #f])'>;
 
-statement = .ID <'(define (e-'*')\n\t'> '=' expression ';' <')\n'>;
+statement = .ID <'\n(define (e-'*')\n\t'> '=' expression ';' <')\n'>;
 
-compiler = <'#lang racket\n(require \"meta.rkt\")\n\n'>
+compiler = <'#lang racket\n(require \"meta.rkt\")\n'>
 	$statement '.SYNTAX' .ID
-	<'\n(unless ('*'\"\\nfailed\")'>
+	<'\n(unless (e-'*') \"\\nfailed\")'>;
 
 .SYNTAX compiler
